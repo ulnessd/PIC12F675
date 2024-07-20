@@ -19,9 +19,13 @@ resetVect:
     PAGESEL main
     goto main
 
-PSECT intVect, class=CODE, delta=2, abs, reloc=0x0004
-intVect:
-    PAGESEL ISR
+;PSECT intVect, class=CODE, delta=2, abs, reloc=0x0004
+ORG 0x0004
+;intVect:
+    ;PAGESEL ISR
+    ;bsf STATUS, 5
+    ;btfss INTCON, 1 ; Check if it?s the external interrupt
+    ;retfie; If not, return from interrupt
     goto ISR  ; Interrupt vector    
 
 main:
@@ -49,10 +53,11 @@ main:
     
     
 mainloop:
-    bsf GP0
+    bcf GP5
+    bsf GP1
     movlw 25
     call delay
-    bcf GP0
+    bcf GP1
     movlw 25
     call delay
     goto mainloop
@@ -74,20 +79,19 @@ delay_loop:
     goto out_out_loop
     retlw 0 ; the return sets the working register to zero. 
     nop 
-    
-    
-PSECT isr_code, class=CODE, delta=2
+
+
 ISR:
-testloop:
-    bsf GP5
-    goto testloop
-    bsf STATUS, 5
-    btfss INTCON, 1 ; Check if it?s the external interrupt
-    retfie; If not, return from interrupt
-    
+    bsf STATUS, 5   ; move to bank 0
     bcf INTCON, 1   ; Clear interrupt flag
+    bcf STATUS, 5   ; move to bank 1
+    
+    ; delay
+    movlw 255
+    movwf 0xB3
+intloop:    
     bsf GP5
-    ;movlw 45
-    ;call delay
-    bcf STATUS, 5
+    decfsz 0xB3, 1
+    goto intloop
+    nop
     retfie
