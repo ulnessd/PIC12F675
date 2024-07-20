@@ -19,13 +19,7 @@ resetVect:
     PAGESEL main
     goto main
 
-;PSECT intVect, class=CODE, delta=2, abs, reloc=0x0004
 ORG 0x0004
-;intVect:
-    ;PAGESEL ISR
-    ;bsf STATUS, 5
-    ;btfss INTCON, 1 ; Check if it?s the external interrupt
-    ;retfie; If not, return from interrupt
     goto ISR  ; Interrupt vector    
 
 main:
